@@ -62,7 +62,7 @@ int main() {
   vector<int> sequence;
   int draw;
   char separator;
-  Board cur, winner;
+  Board cur, winner, loser;
 
   do {
     cin >> draw >> separator;
@@ -71,10 +71,13 @@ int main() {
   } while (separator == ',');
 
   read_board(cin, winner, sequence_map);
+  loser = winner;
   while (read_board(cin, cur, sequence_map)) {
     winner = min(winner, cur);
+    loser = max(loser, cur);
   }
 
-  cout << winner.get_score(sequence) << endl;
+  cout << "Winner: " << winner.get_score(sequence) << endl;
+  cout << "Loser: " << loser.get_score(sequence) << endl;
   return 0;
 }
