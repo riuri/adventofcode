@@ -5,7 +5,7 @@ using namespace std;
 
 class Mat {
 public:
-  int mat[9][9] = {
+  long long int mat[9][9] = {
     {0, 1, 0, 0, 0, 0, 0, 0, 0},
     {0, 0, 1, 0, 0, 0, 0, 0, 0},
     {0, 0, 0, 1, 0, 0, 0, 0, 0},
@@ -39,8 +39,8 @@ public:
       return sq * sq;
     }
   }
-  array<int, 9> operator*(const array<int, 9> &o) const {
-    array<int, 9> v;
+  array<long long int, 9> operator*(const array<long long int, 9> &o) const {
+    array<long long int, 9> v = {0, 0, 0, 0, 0, 0, 0, 0, 0};
     for (int i = 0; i < 9; ++i) {
       for (int j = 0; j < 9; ++j) {
         v[i] += mat[i][j] * o[j];
@@ -52,7 +52,7 @@ public:
 
 int main() {
   Mat m;
-  array<int, 9> begin = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  array<long long int, 9> begin = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   int cur;
   while (cin >> cur) {
     char separator;
@@ -60,12 +60,16 @@ int main() {
     cin >> separator;
   }
 
-  array<int, 9> end = (m ^ 80) * begin;
-  int sum = 0;
+  array<long long int, 9> end80 = (m ^ 80) * begin;
+  array<long long int, 9> end256 = (m ^ 256) * begin;
+  long long int sum80 = 0;
+  long long int sum256 = 0;
   for (int i = 0; i < 9; ++i) {
-    sum += end[i];
+    sum80 += end80[i];
+    sum256 += end256[i];
   }
-  cout << sum << endl;
+  cout << "After 80 days: " << sum80 << endl;
+  cout << "After 256 days: " << sum256 << endl;
 
   return 0;
 }
