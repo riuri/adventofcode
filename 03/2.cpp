@@ -48,7 +48,7 @@ int main() {
     }
     report.insert(curint);
   }
-  
+
   filter.reserve(report.size());
   for (int element : report) {
     for (int i = 0; i < report.count(element); ++i) {

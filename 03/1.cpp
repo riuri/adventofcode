@@ -17,7 +17,7 @@ int main() {
   cin >> cur;
   mode.resize(cur.size(), 0);
   count_bits(mode, cur);
-  
+
   while (cin >> cur) {
     count++;
     count_bits(mode, cur);
