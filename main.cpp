@@ -80,21 +80,24 @@ filesystem::path compile(const filesystem::path &code) {
 }
 
 string verify_and_execute(const filesystem::path &code) {
-  cout << "On " << code.c_str() << flush;
+  const string UP = "\x1b[F", GREEN = "\x1b[32m", RESET = "\x1b[0m";
+  cout << "On " << code.native() << endl;
   auto executable = compile(code);
-  cout << ":" << flush;
+  cout << UP << "On " << GREEN << code.c_str() << RESET << flush << ":";
 
   // Verify
   auto sample = code.parent_path() / "sample.txt";
   auto expect =
       code.parent_path() / ("expect_" + code.stem().native() + ".txt");
   if (filesystem::exists(sample) && filesystem::exists(expect)) {
+    cout << " __\n";
     string actual = execute(executable, sample);
     ifstream f(expect);
     string expected(istreambuf_iterator<char>(f), {});
     f.close();
     if (expected == actual) {
-      cout << " OK\n";
+      cout << UP << "On " << GREEN << code.native() << RESET << ": " << GREEN;
+      cout << "OK" << RESET << endl;
     } else {
       cout << endl;
       cerr << "Sample expectation: " << expected << endl;
@@ -106,7 +109,12 @@ string verify_and_execute(const filesystem::path &code) {
   }
 
   // Execute
-  return execute(executable, code.parent_path() / "input.txt");
+  auto input = code.parent_path() / "input.txt";
+  if (!filesystem::exists(input)) {
+    cerr << "It’s time to use the actual input\n";
+    throw runtime_error("Missing input.txt");
+  }
+  return execute(executable, input);
 }
 void verify_and_execute_day(const filesystem::path &day) {
   priority_queue<pair<filesystem::file_time_type, filesystem::path>> pq;
