@@ -16,6 +16,7 @@ public:
     {0, 0, 0, 0, 0, 0, 0, 0, 1},
     {1, 0, 0, 0, 0, 0, 0, 0, 0}
   };
+  // Matrix multiplication
   Mat operator*(const Mat &o) const {
     Mat m;
     for (int i = 0; i < 9; ++i) {
@@ -28,6 +29,7 @@ public:
     }
     return m;
   }
+  // Matrix power
   Mat operator^(unsigned int n) const {
     if (n == 1) {
       return *this;
@@ -39,14 +41,15 @@ public:
       return sq * sq;
     }
   }
-  array<long long int, 9> operator*(const array<long long int, 9> &o) const {
-    array<long long int, 9> v = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  // Multiplication by vector. We only need the sum of the vector
+  long long int operator*(const array<long long int, 9> &o) const {
+    long long int sum = 0;
     for (int i = 0; i < 9; ++i) {
       for (int j = 0; j < 9; ++j) {
-        v[i] += mat[i][j] * o[j];
+        sum += mat[i][j] * o[j];
       }
     }
-    return v;
+    return sum;
   }
 };
 
@@ -60,16 +63,8 @@ int main() {
     cin >> separator;
   }
 
-  array<long long int, 9> end80 = (m ^ 80) * begin;
-  array<long long int, 9> end256 = (m ^ 256) * begin;
-  long long int sum80 = 0;
-  long long int sum256 = 0;
-  for (int i = 0; i < 9; ++i) {
-    sum80 += end80[i];
-    sum256 += end256[i];
-  }
-  cout << "After 80 days: " << sum80 << endl;
-  cout << "After 256 days: " << sum256 << endl;
+  cout << "After 80 days: " << (m ^ 80) * begin << endl;
+  cout << "After 256 days: " << (m ^ 256) * begin << endl;
 
   return 0;
 }
