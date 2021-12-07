@@ -57,32 +57,54 @@ string execute(const filesystem::path &executable,
   return out;
 }
 
-filesystem::path compile(const filesystem::path &code) {
+filesystem::path get_executable(const filesystem::path &code,
+                                bool compile = true) {
   if (code.extension() == ".cpp") {
     filesystem::path executable = code.parent_path() / "a.out";
-    pid_t pid = fork();
-    if (pid == 0) {
-      execlp("g++", "g++", "-Wall", code.c_str(), "-std=c++20", "-o",
-             executable.c_str(), nullptr);
+    if (compile) {
+      pid_t pid = fork();
+      if (pid == 0) {
+        execlp("g++", "g++", "-g", "-Wall", code.c_str(), "-std=c++20", "-o",
+               executable.c_str(), nullptr);
+      }
+      check_pid(pid, "Error on C++ compilation");
     }
-    check_pid(pid, "Error on C++ compilation");
     return executable;
   } else if (code.extension() == ".rs") {
     filesystem::path executable = code.parent_path() / code.stem();
-    pid_t pid = fork();
-    if (pid == 0) {
-      execlp("rustc", "rustc", code.c_str(), "-o", executable.c_str(), nullptr);
+    if (compile) {
+      pid_t pid = fork();
+      if (pid == 0) {
+        execlp("rustc", "rustc", "-g", code.c_str(), "-o", executable.c_str(),
+               nullptr);
+      }
+      check_pid(pid, "Error on Rust compilation");
     }
-    check_pid(pid, "Error on Rust compilation");
     return executable;
   }
   return code;
 }
 
+void debug(const filesystem::path &executable, const string extension) {
+  if (extension == ".cpp") {
+    execlp("gdb", "gdb", executable.filename().c_str(), "--cd",
+           executable.parent_path().c_str(), "-ex", "b main", "-ex",
+           "r < sample.txt", "-ex", "n", "--tui", "--silent", nullptr);
+  } else if (extension == ".rs") {
+    execlp("rust-gdb", "rust-gdb", executable.filename().c_str(), "--cd",
+           executable.parent_path().c_str(), "-ex", "b main", "-ex",
+           "r < sample.txt", "-ex", "n", "--tui", "--silent", nullptr);
+  } else if (extension == ".py") {
+    execlp("python3", "python3", "-m", "pdb", executable.c_str(), nullptr);
+  } else {
+    throw runtime_error("Tried to debug, but don’t know " + extension + ".");
+  }
+}
+
 string verify_and_execute(const filesystem::path &code) {
   const string UP = "\x1b[F", GREEN = "\x1b[32m", RESET = "\x1b[0m";
   cout << "On " << code.native() << endl;
-  auto executable = compile(code);
+  auto executable = get_executable(code);
   cout << UP << "On " << GREEN << code.c_str() << RESET << flush << ":";
 
   // Verify
@@ -102,7 +124,7 @@ string verify_and_execute(const filesystem::path &code) {
       cout << endl;
       cerr << "Sample expectation: " << expected << endl;
       cerr << "Actual: " << actual << endl;
-      throw runtime_error("Sample expectation failed");
+      debug(executable, code.extension());
     }
   } else {
     cout << endl;
@@ -132,19 +154,21 @@ void verify_and_execute_day(const filesystem::path &day) {
     }
   }
 
-  map<string, string> outputs;
+  map<string, tuple<string, filesystem::path, string>> outputs;
   while (!pq.empty()) {
     const filesystem::path &code = pq.top().second;
     string output = verify_and_execute(pq.top().second);
     cout << output;
     auto it = outputs.find(code.stem());
     if (it == outputs.end()) {
-      outputs[code.stem()] = output;
+      outputs[code.stem()] =
+          make_tuple(output, get_executable(code, false), code.extension());
     } else {
-      if (it->second != output) {
+      if (get<0>(it->second) != output) {
         cerr << "Output: " << output << endl;
-        cerr << "Previous: " << it->second << endl;
-        throw runtime_error("Outputs don’t match");
+        cerr << "Previous: " << get<0>(it->second) << endl;
+        cerr << "Outputs don’t match, debugging latest changed." << endl;
+        debug(get<1>(it->second), get<2>(it->second));
       }
     }
     pq.pop();
