@@ -64,8 +64,8 @@ filesystem::path get_executable(const filesystem::path &code,
     if (compile) {
       pid_t pid = fork();
       if (pid == 0) {
-        execlp("g++", "g++", "-g", "-Wall", code.c_str(), "-std=c++20", "-o",
-               executable.c_str(), nullptr);
+        execlp("g++", "g++", "-g", "-Wall", "-Werror", code.c_str(),
+               "-std=c++20", "-o", executable.c_str(), nullptr);
       }
       check_pid(pid, "Error on C++ compilation");
     }
