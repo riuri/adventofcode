@@ -14,7 +14,7 @@ int main() {
 
   auto it = s.cbegin();
   int fuel = 0;
-  for (size_t i = 0; i < s.size()/2; ++i, ++it) {
+  for (size_t i = 0; i < s.size() / 2; ++i, ++it) {
     fuel -= *it;
   }
   for (; it != s.cend(); ++it) {
