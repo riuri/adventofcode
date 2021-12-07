@@ -85,15 +85,16 @@ filesystem::path get_executable(const filesystem::path &code,
   return code;
 }
 
-void debug(const filesystem::path &executable, const string extension) {
+void debug(const filesystem::path &executable, const string extension,
+           const string input) {
   if (extension == ".cpp") {
     execlp("gdb", "gdb", executable.filename().c_str(), "--cd",
            executable.parent_path().c_str(), "-ex", "b main", "-ex",
-           "r < sample.txt", "-ex", "n", "--tui", "--silent", nullptr);
+           ("r < " + input).c_str(), "-ex", "n", "--tui", "--silent", nullptr);
   } else if (extension == ".rs") {
     execlp("rust-gdb", "rust-gdb", executable.filename().c_str(), "--cd",
            executable.parent_path().c_str(), "-ex", "b main", "-ex",
-           "r < sample.txt", "-ex", "n", "--tui", "--silent", nullptr);
+           ("r < " + input).c_str(), "-ex", "n", "--tui", "--silent", nullptr);
   } else if (extension == ".py") {
     execlp("python3", "python3", "-m", "pdb", executable.c_str(), nullptr);
   } else {
@@ -124,7 +125,7 @@ string verify_and_execute(const filesystem::path &code) {
       cout << endl;
       cerr << "Sample expectation: " << expected << endl;
       cerr << "Actual: " << actual << endl;
-      debug(executable, code.extension());
+      debug(executable, code.extension(), sample.filename().native());
     }
   } else {
     cout << endl;
@@ -168,7 +169,7 @@ void verify_and_execute_day(const filesystem::path &day) {
         cerr << "Output: " << output << endl;
         cerr << "Previous: " << get<0>(it->second) << endl;
         cerr << "Outputs don’t match, debugging latest changed." << endl;
-        debug(get<1>(it->second), get<2>(it->second));
+        debug(get<1>(it->second), get<2>(it->second), "input.txt");
       }
     }
     pq.pop();
@@ -184,7 +185,8 @@ int main() {
     if (day.path().filename().native()[0] == '.') {
       continue;
     }
-    for (const auto &file : filesystem::directory_iterator(day.path())) {
+    for (const auto &file :
+         filesystem::recursive_directory_iterator(day.path())) {
       if (!file.is_regular_file()) {
         continue;
       }
@@ -193,8 +195,8 @@ int main() {
       }
       string extension = file.path().extension();
       if (extension == ".cpp" || extension == ".py" || extension == ".rs") {
-        pq.push(
-            make_pair(file.last_write_time(), day.path().lexically_normal()));
+        pq.push(make_pair(file.last_write_time(),
+                          file.path().parent_path().lexically_normal()));
       }
     }
   }
