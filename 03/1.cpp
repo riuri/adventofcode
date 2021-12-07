@@ -4,7 +4,7 @@
 using namespace std;
 
 void count_bits(vector<int> &mode, const string &cur) {
-  for (int i = 0; i < mode.size(); ++i) {
+  for (size_t i = 0; i < mode.size(); ++i) {
     mode[i] += cur[i] == '1';
   }
 }

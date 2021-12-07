@@ -42,7 +42,7 @@ int main() {
 
   while (cin >> cur) {
     int curint = 0;
-    for (int i = 0; i < cur.size(); ++i) {
+    for (size_t i = 0; i < cur.size(); ++i) {
       curint <<= 1;
       curint += cur[i] & 1;
     }
@@ -51,7 +51,7 @@ int main() {
 
   filter.reserve(report.size());
   for (int element : report) {
-    for (int i = 0; i < report.count(element); ++i) {
+    for (size_t i = 0; i < report.count(element); ++i) {
       filter.push_back(element);
     }
   }

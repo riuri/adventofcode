@@ -42,7 +42,7 @@ string execute(const filesystem::path &executable,
     int fd = open(input.c_str(), O_RDONLY);
     dup2(fd, 0);
     close(fd);
-    alarm(15);
+    alarm(TIME_LIMIT);
     execl(executable.c_str(), executable.filename().c_str(), nullptr);
   }
   close(fdout[1]);
@@ -62,8 +62,8 @@ filesystem::path compile(const filesystem::path &code) {
     filesystem::path executable = code.parent_path() / "a.out";
     pid_t pid = fork();
     if (pid == 0) {
-      execlp("g++", "g++", code.c_str(), "-std=c++20", "-o", executable.c_str(),
-             nullptr);
+      execlp("g++", "g++", "-Wall", code.c_str(), "-std=c++20", "-o",
+             executable.c_str(), nullptr);
     }
     check_pid(pid, "Error on C++ compilation");
     return executable;
