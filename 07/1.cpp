@@ -17,7 +17,6 @@ int main() {
   for (int i = 0; i < s.size()/2; ++i, ++it) {
     fuel -= *it;
   }
-  int centre = *it;
   for (; it != s.cend(); ++it) {
     fuel += *it;
   }
