@@ -9,7 +9,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-#define TIME_LIMIT 15
+#define TIME_LIMIT 5
 
 using namespace std;
 
@@ -30,7 +30,26 @@ void check_pid(pid_t pid, const string &error) {
   }
 }
 
+void debug(const filesystem::path &executable, const string extension,
+           const string input) {
+  sleep(2);
+  if (extension == ".cpp") {
+    execlp("gdb", "gdb", executable.filename().c_str(), "--cd",
+           executable.parent_path().c_str(), "-ex", "b main", "-ex",
+           ("r < " + input).c_str(), "-ex", "n", "--tui", "--silent", nullptr);
+  } else if (extension == ".rs") {
+    execlp("rust-gdb", "rust-gdb", executable.filename().c_str(), "--cd",
+           executable.parent_path().c_str(), "-ex", "b main", "-ex",
+           ("r < " + input).c_str(), "-ex", "n", "--tui", "--silent", nullptr);
+  } else if (extension == ".py") {
+    execlp("python3", "python3", "-m", "pdb", executable.c_str(), nullptr);
+  } else {
+    throw runtime_error("Tried to debug, but don’t know " + extension + ".");
+  }
+}
+
 string execute(const filesystem::path &executable,
+               const string &extension,
                const filesystem::path &input) {
   int fdout[2];
   pipe(fdout);
@@ -53,7 +72,12 @@ string execute(const filesystem::path &executable,
     out.append(buf, c);
   }
   close(fdout[0]);
-  check_pid(pid, "Error on execution");
+  try {
+    check_pid(pid, "Error on execution");
+  } catch(runtime_error &e) {
+    cerr << e.what() << endl;
+    debug(executable, extension, input.filename().native());
+  }
   return out;
 }
 
@@ -85,23 +109,6 @@ filesystem::path get_executable(const filesystem::path &code,
   return code;
 }
 
-void debug(const filesystem::path &executable, const string extension,
-           const string input) {
-  if (extension == ".cpp") {
-    execlp("gdb", "gdb", executable.filename().c_str(), "--cd",
-           executable.parent_path().c_str(), "-ex", "b main", "-ex",
-           ("r < " + input).c_str(), "-ex", "n", "--tui", "--silent", nullptr);
-  } else if (extension == ".rs") {
-    execlp("rust-gdb", "rust-gdb", executable.filename().c_str(), "--cd",
-           executable.parent_path().c_str(), "-ex", "b main", "-ex",
-           ("r < " + input).c_str(), "-ex", "n", "--tui", "--silent", nullptr);
-  } else if (extension == ".py") {
-    execlp("python3", "python3", "-m", "pdb", executable.c_str(), nullptr);
-  } else {
-    throw runtime_error("Tried to debug, but don’t know " + extension + ".");
-  }
-}
-
 string verify_and_execute(const filesystem::path &code) {
   const string UP = "\x1b[F", GREEN = "\x1b[32m", RESET = "\x1b[0m";
   cout << "On " << code.native() << endl;
@@ -114,7 +121,7 @@ string verify_and_execute(const filesystem::path &code) {
       code.parent_path() / ("expect_" + code.stem().native() + ".txt");
   if (filesystem::exists(sample) && filesystem::exists(expect)) {
     cout << " __\n";
-    string actual = execute(executable, sample);
+    string actual = execute(executable, code.extension(), sample);
     ifstream f(expect);
     string expected(istreambuf_iterator<char>(f), {});
     f.close();
@@ -137,7 +144,7 @@ string verify_and_execute(const filesystem::path &code) {
     cerr << "It’s time to use the actual input\n";
     throw runtime_error("Missing input.txt");
   }
-  return execute(executable, input);
+  return execute(executable, code.extension(), input);
 }
 void verify_and_execute_day(const filesystem::path &day) {
   priority_queue<pair<filesystem::file_time_type, filesystem::path>> pq;
