@@ -3,10 +3,6 @@
 
 using namespace std;
 
-int check(size_t size) {
-  return 1 & ((size >> 1) ^ ((size >> 2) & ~size));
-}
-
 int main() {
   string cur, ignore;
   int count = 0;
@@ -21,10 +17,11 @@ int main() {
         break;
       }
       cin >> cur;
-      count += check(cur.size());
+      size_t size = cur.size();
+      count += 1 & ((size >> 1) ^ ((size >> 2) & ~size));
     }
   }
-  
-  cout << count << endl;;
+
+  cout << count << endl;
   return 0;
 }
