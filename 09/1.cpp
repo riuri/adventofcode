@@ -1,5 +1,5 @@
-#include<iostream>
-#include<vector>
+#include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -11,8 +11,8 @@ int main() {
   prev_low.resize(prev.size(), true);
   cur_low.resize(prev.size(), true);
   for (size_t i = 1; i < prev.size(); ++i) {
-    prev_low[i] = prev_low[i] && (prev[i] < prev[i-1]);
-    prev_low[i-1] = prev_low[i-1] && (prev[i-1] < prev[i]);
+    prev_low[i] = prev_low[i] && (prev[i] < prev[i - 1]);
+    prev_low[i - 1] = prev_low[i - 1] && (prev[i - 1] < prev[i]);
   }
   while (cin >> cur) {
     for (size_t i = 0; i < cur_low.size(); ++i) {
@@ -24,8 +24,8 @@ int main() {
       sum += prev[0] - '0' + 1;
     }
     for (size_t i = 1; i < cur.size(); ++i) {
-      cur_low[i] = cur_low[i] && (cur[i] < cur[i-1]) && (cur[i] < prev[i]);
-      cur_low[i-1] = cur_low[i-1] && (cur[i-1] < cur[i]);
+      cur_low[i] = cur_low[i] && (cur[i] < cur[i - 1]) && (cur[i] < prev[i]);
+      cur_low[i - 1] = cur_low[i - 1] && (cur[i - 1] < cur[i]);
       prev_low[i] = prev_low[i] && (prev[i] < cur[i]);
       if (prev_low[i]) {
         sum += prev[i] - '0' + 1;
