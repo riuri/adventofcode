@@ -9,7 +9,9 @@
 using namespace std;
 
 int main() {
+  // When do we expect i,j to flash?
   int step[SIZE][SIZE];
+  // What octopi do we expect to flash at step i?
   map<int, set<pair<int, int>>> to_flash;
   char cur;
 
@@ -64,7 +66,7 @@ int main() {
       flashes += flashed.size();
     }
     to_flash.erase(next_step);
-    if (to_flash.size() <= 1) {
+    if (to_flash.size() <= 1 && sync_step < 0) {
       sync_step = next_step;
     }
   }
