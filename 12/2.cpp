@@ -1,12 +1,13 @@
+#include <cctype>
 #include <iostream>
 #include <map>
-#include <string>
 #include <set>
-#include <cctype>
+#include <string>
 
 using namespace std;
 
-int dfs(const map<string, set<string>> &graph, const string &node, set<string> &visited, bool twice) {
+int dfs(const map<string, set<string>> &graph, const string &node,
+        set<string> &visited, bool twice) {
   int count = 0;
   for (const string &next : graph.at(node)) {
     if (next == "end") {
@@ -41,7 +42,7 @@ int main() {
         break;
       }
     } else {
-      string node1(cur, 0, separator), node2(cur, separator+1);
+      string node1(cur, 0, separator), node2(cur, separator + 1);
       if (node2 != "start" && node1 != "end") {
         graph[node1].insert(node2);
       }
