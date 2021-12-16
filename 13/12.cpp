@@ -10,8 +10,9 @@ inline int fold1d(int pos, int fold) {
   return pos > fold ? (2 * fold - pos) : pos;
 }
 
-int count(const set<pair<int, int>> &input, const vector<int> &xx,
-          const vector<int> &yy) {
+set<pair<int, int>> foldall(const set<pair<int, int>> &input,
+                            const vector<int> &xx, const vector<int> &yy,
+                            int &maxx, int &maxy) {
   set<pair<int, int>> output;
   for (const auto &point : input) {
     int x = point.first;
@@ -22,9 +23,11 @@ int count(const set<pair<int, int>> &input, const vector<int> &xx,
     for (int yfold : yy) {
       y = fold1d(y, yfold);
     }
+    maxx = max(x, maxx);
+    maxy = max(y, maxy);
     output.emplace(x, y);
   }
-  return output.size();
+  return output;
 }
 
 int main() {
@@ -59,13 +62,23 @@ int main() {
     }
   }
 
+  int maxx = -1, maxy = -1;
   if (first) {
     vector<int> empty, one(1, (*first)[0]);
     if (first == &xx) {
-      cout << count(input, one, empty) << endl;
+      cout << foldall(input, one, empty, maxx, maxy).size() << endl;
     } else if (first == &yy) {
-      cout << count(input, empty, one) << endl;
+      cout << foldall(input, empty, one, maxx, maxy).size() << endl;
     }
+  }
+  maxx = -1;
+  maxy = -1;
+  auto output = foldall(input, xx, yy, maxx, maxy);
+  for (y = 0; y <= maxy; ++y) {
+    for (x = 0; x <= maxx; ++x) {
+      cout << (output.contains(make_pair(x, y)) ? '#' : '.');
+    }
+    cout << endl;
   }
   return 0;
 }
