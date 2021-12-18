@@ -22,18 +22,7 @@ Location neighbour(Location l, int i) {
 
 typedef tuple<int, int, Location> GraphState;
 
-int main() {
-  vector<vector<int>> risk;
-  string cur;
-
-  while (cin >> cur) {
-    vector<int> row;
-    for (size_t i = 0; i < cur.size(); ++i) {
-      row.push_back(cur[i] - '0');
-    }
-    risk.push_back(row);
-  }
-
+int astar(vector<vector<int>> risk) {
   Location end(risk.size() - 1, risk.size() - 1);
   priority_queue<GraphState, vector<GraphState>, greater<GraphState>> pq;
   set<Location> visited;
@@ -46,8 +35,7 @@ int main() {
     }
     visited.insert(cur);
     if (cur == end) {
-      cout << cost << endl;
-      return 0;
+      return cost;
     }
     for (int i = 0; i < 4; ++i) {
       Location neigh = neighbour(cur, i);
@@ -61,5 +49,39 @@ int main() {
       pq.emplace(astar(neigh, risk.size()) + next_cost, next_cost, neigh);
     }
   }
-  return 1;
+  return -1;
+}
+
+int main() {
+  vector<vector<int>> risk, increased_risk;
+  string cur;
+
+  while (cin >> cur) {
+    vector<int> row, increased_row;
+    for (size_t i = 0; i < cur.size(); ++i) {
+      row.push_back(cur[i] - '0');
+    }
+    risk.push_back(row);
+    increased_row = row;
+    for (int i = 0; i < 4; ++i) {
+      for (size_t j = 0; j < row.size(); ++j) {
+        increased_row.push_back((row[j] + i) % 9 + 1);
+      }
+    }
+    increased_risk.push_back(increased_row);
+  }
+
+  for (int i = 0; i < 4; ++i) {
+    for (size_t j = 0; j < risk.size(); ++j) {
+      vector<int> increased_row;
+      for (size_t k = 0; k < increased_risk[j].size(); ++k) {
+        increased_row.push_back((increased_risk[j][k] + i) % 9 + 1);
+      }
+      increased_risk.push_back(increased_row);
+    }
+  }
+
+  cout << astar(risk) << endl;
+  cout << astar(increased_risk) << endl;
+  return 0;
 }
