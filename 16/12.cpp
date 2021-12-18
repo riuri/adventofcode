@@ -92,6 +92,60 @@ public:
     }
     return sum;
   }
+
+  unsigned long int eval() const {
+    switch (type) {
+    case 0: // sum
+    {
+      unsigned long int val = 0;
+      for (const Packet &packet : sub_packets) {
+        val += packet.eval();
+      }
+      return val;
+    }
+    case 1: // product
+    {
+      unsigned long int val = 1;
+      for (const Packet &packet : sub_packets) {
+        val *= packet.eval();
+      }
+      return val;
+    }
+    case 2: // minimum
+    {
+      unsigned long int val = numeric_limits<unsigned long int>::max();
+      for (const Packet &packet : sub_packets) {
+        val = min(val, packet.eval());
+      }
+      return val;
+    }
+    case 3: // maximum
+    {
+      unsigned long int val = numeric_limits<unsigned long int>::min();
+      for (const Packet &packet : sub_packets) {
+        val = max(val, packet.eval());
+      }
+      return val;
+    }
+    case 4: // value
+    {
+      unsigned long int val = 0;
+      for (const ValueItem &item : value) {
+        val <<= 4;
+        val |= (item & 0xf);
+      }
+      return val;
+    }
+    case 5: // greater
+      return sub_packets[0].eval() > sub_packets[1].eval();
+    case 6: // less
+      return sub_packets[0].eval() < sub_packets[1].eval();
+    case 7: // equal
+      return sub_packets[0].eval() == sub_packets[1].eval();
+    default:
+      return 0;
+    }
+  }
 };
 istream &operator>>(istream &in, Packet &packet) {
   packet.value.clear();
@@ -132,7 +186,7 @@ istream &operator>>(istream &in, Packet &packet) {
 int main() {
   Packet packet;
   while (cin >> packet) {
-    cout << packet.version_sum() << endl;
+    cout << packet.version_sum() << " " << packet.eval() << endl;
   }
   return 0;
 }
