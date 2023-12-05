@@ -8,17 +8,17 @@ int main()
   string ignore, colour;
   int game, sum = 0;
   while (cin >> ignore >> game >> ignore) {
-    int count;
-    bool game_possible = true;
+    int r = 0, g = 0, b = 0, count;
     do {
       cin >> count >> colour;
-      if ((colour.starts_with("red") && count > 12)
-        || (colour.starts_with("green") && count > 13)
-        || (colour.starts_with("blue") && count > 14))
-        game_possible = false;
+      if (colour.starts_with("red"))
+        r = max(r, count);
+      else if (colour.starts_with("green"))
+        g = max(g, count);
+      else if (colour.starts_with("blue"))
+        b = max(b, count);
     } while (colour[colour.size() - 1] == ';' || colour[colour.size() - 1] == ',');
-    if (game_possible)
-      sum += game;
+    sum += r * g * b;
   }
   cout << sum << endl;
   return 0;
