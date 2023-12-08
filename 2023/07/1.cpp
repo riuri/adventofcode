@@ -6,16 +6,6 @@
 
 using namespace std;
 
-typedef enum {
-  high_card,
-  one_pair,
-  two_pair,
-  three,
-  full_house,
-  four,
-  five
-} Type;
-
 typedef union {
   long comp;
   char cards[5];
@@ -49,34 +39,23 @@ Cards from_string(const string &s) {
   return ret;
 }
 
-Type classify_cards(const Cards &cards) {
-  multiset<char> s1;
-  set<char> s0;
+Cards classify_cards(const Cards &cards) {
+  Cards ret;
+  ret.comp = 0;
+  multiset<char> counts;
+  set<char> s;
   for (size_t i = 0; i < 5; ++i) {
-    s0.insert(cards.cards[i]);
-    s1.insert(cards.cards[i]);
+    s.insert(cards.cards[i]);
+    counts.insert(cards.cards[i]);
   }
-  multiset<size_t> s2;
-  for (auto c : s0) {
-    s2.insert(s1.count(c));
+  for (auto c : s) {
+    ret.cards[counts.count(c)-1]++;
   }
-  if (s2.count(5))
-    return five;
-  else if (s2.count(4))
-    return four;
-  else if (s2.count(3)) {
-    if (s2.count(2))
-      return full_house;
-    return three;
-  } else if (s2.count(2) == 2)
-    return two_pair;
-  else if (s2.count(2) == 1)
-    return one_pair;
-  return high_card;
+  return ret;
 }
 
 class Hand {
-  Type type;
+  Cards type;
   Cards cards;
 public:
   long bidding;
@@ -86,9 +65,9 @@ public:
   }
 
   strong_ordering operator<=>(const Hand &other) const {
-    if (type > other.type) {
+    if (type.comp > other.type.comp) {
       return strong_ordering::greater;
-    } else if (type < other.type) {
+    } else if (type.comp < other.type.comp) {
       return strong_ordering::less;
     }
     return cards.comp <=> other.cards.comp;
